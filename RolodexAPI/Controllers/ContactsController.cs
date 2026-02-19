@@ -145,4 +145,24 @@ public class ContactsController : ControllerBase
         return nextBirthday.Year - birthDate.Year;
     }
 
+    [HttpGet("stale")]
+    public async Task<ActionResult<IEnumerable<StaleContactDto>>> GetStaleContacts([FromQuery] int days = 90)
+    {
+        var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-days));
+
+        // Note: Contacts with null LastContactedDate are considered stale
+        var stale = await _context.Contacts
+            .Where(c => c.LastContactedDate == null || c.LastContactedDate < cutoff)
+            .OrderBy(c => c.LastContactedDate)
+            .Select(c => new StaleContactDto(
+                c.Id,
+                c.FirstName,
+                c.LastName,
+                c.LastContactedDate
+            ))
+            .ToListAsync();
+
+        return Ok(stale);
+    }
+
 }
