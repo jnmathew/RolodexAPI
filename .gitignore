@@ -6,6 +6,9 @@ obj/
 *.user
 *.suo
 
+## Databases
+*.db
+
 ## VS Code
 .vscode/
 
