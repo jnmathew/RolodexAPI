@@ -92,5 +92,57 @@ public class ContactsController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("upcoming-birthdays")]
+    public async Task<ActionResult<IEnumerable<UpcomingBirthdayDto>>> GetUpcomingBirthdays([FromQuery] int days = 30)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var contacts = await _context.Contacts
+            .Where(c => c.DateOfBirth != null)
+            .ToListAsync();
+        
+        var upcoming = contacts
+            .Select(c => new UpcomingBirthdayDto(
+                c.Id,
+                c.FirstName,
+                c.LastName,
+                GetNextBirthday(c.DateOfBirth!.Value, today),
+                GetUpcomingAge(c.DateOfBirth!.Value, today)
+            ))
+            .Where(dto => dto.NextBirthday <= today.AddDays(days))
+            .OrderBy(dto => dto.NextBirthday)
+            .ToList();
+
+        return Ok(upcoming);
+    }
+
+    private DateOnly GetNextBirthday(DateOnly birthDate, DateOnly today)
+    {
+        var birthday = birthDate;
+
+        // Handle Feb 29 in non-leap years by treating it as Feb 28
+        if (birthday.Month == 2 && birthday.Day == 29 && !DateTime.IsLeapYear(today.Year))
+        {
+            birthday = new DateOnly(today.Year, 2, 28);
+        }
+        else
+        {
+            birthday = new DateOnly(today.Year, birthDate.Month, birthDate.Day);
+        }
+
+        // If the birthday has already occurred this year, move to the next year
+        if (birthday < today)
+        {
+            birthday = birthday.AddYears(1);
+        }
+
+        return birthday;
+    }
+
+    private int GetUpcomingAge(DateOnly birthDate, DateOnly today)
+    {
+        var nextBirthday = GetNextBirthday(birthDate, today);
+        return nextBirthday.Year - birthDate.Year;
+    }
 
 }
