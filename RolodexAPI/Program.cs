@@ -1,3 +1,4 @@
+using Scalar.AspNetCore;  
 using Microsoft.EntityFrameworkCore;
 using RolodexAPI.Data;
 
@@ -16,10 +17,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "RolodexAPI");
-    });
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
