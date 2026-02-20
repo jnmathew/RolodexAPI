@@ -1,4 +1,4 @@
-# Rolodex API
+# RolodexAPI
 
 A RESTful contact management API built with ASP.NET Core, Entity Framework Core, and SQLite. Implements CRUD operations and domain-specific query endpoints for tracking personal contacts, upcoming birthdays, and stale relationships.
 
