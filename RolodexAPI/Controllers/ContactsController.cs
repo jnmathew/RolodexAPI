@@ -16,11 +16,16 @@ public class ContactsController : ControllerBase
     }
 
     [HttpGet]
+    [EndpointSummary("Get all contacts")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<Contact>>> GetAllContacts() {
         return await _context.Contacts.ToListAsync();
     }
 
     [HttpGet("{id}")]
+    [EndpointSummary("Get a contact by ID")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Contact>> GetContactById(int id)
     {
         var contact = await _context.Contacts.FindAsync(id);
@@ -32,6 +37,9 @@ public class ContactsController : ControllerBase
     }
 
     [HttpPost]
+    [EndpointSummary("Create a new contact")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Contact>> CreateContact(Contact contact)
     {
         contact.CreatedAtUtc = DateTime.UtcNow;
@@ -46,6 +54,10 @@ public class ContactsController : ControllerBase
     // TODO: Consider adding PATCH endpoint for partial updates (only send changed fields)
     // Current PUT implementation requires sending full Contact object
     [HttpPut("{id}")]
+    [EndpointSummary("Update an existing contact")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateContact(int id, Contact contact)
     {
         if (id != contact.Id)
@@ -78,6 +90,9 @@ public class ContactsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [EndpointSummary("Delete a contact")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteContact(int id)
     {
         var contact = await _context.Contacts.FindAsync(id);
@@ -93,6 +108,9 @@ public class ContactsController : ControllerBase
     }
 
     [HttpGet("upcoming-birthdays")]
+    [EndpointSummary("Get upcoming birthdays")]
+    [EndpointDescription("Returns contacts with birthdays within the specified number of days. Defaults to 30 days.")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<UpcomingBirthdayDto>>> GetUpcomingBirthdays([FromQuery] int days = 30)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -146,6 +164,9 @@ public class ContactsController : ControllerBase
     }
 
     [HttpGet("stale")]
+    [EndpointSummary("Get stale contacts")]
+    [EndpointDescription("Returns contacts not reached out to within the specified number of days. Defaults to 90 days.")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<StaleContactDto>>> GetStaleContacts([FromQuery] int days = 90)
     {
         var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-days));
