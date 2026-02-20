@@ -87,6 +87,7 @@ public class ContactsController : ControllerBase
 
         contact.UpdatedAtUtc = DateTime.UtcNow;
         _context.Entry(contact).State = EntityState.Modified;
+        _context.Entry(contact).Property(c => c.CreatedAtUtc).IsModified = false;
 
         try
         {
