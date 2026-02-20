@@ -64,6 +64,18 @@ The API will be available at `https://localhost:7295`. Browse the interactive AP
 | CreatedAtUtc | DateTime | Auto | Creation timestamp |
 | UpdatedAtUtc | DateTime | Auto | Last update timestamp |
 
+## CORS
+
+CORS is configured via `appsettings.json`. In Development, all origins are allowed by default. For production, update the allowed origins to match your frontend:
+
+```json
+"Cors": {
+  "AllowedOrigins": [ "https://your-frontend-url.com" ]
+}
+```
+
+The default placeholder is `https://localhost:3000` — change this as needed.
+
 ## Design Decisions
 
 - **Separate query endpoints** for birthdays and stale contacts return specialized DTOs rather than overloading the main `/contacts` endpoint with query parameters. This keeps response schemas consistent per endpoint.
@@ -71,8 +83,11 @@ The API will be available at `https://localhost:7295`. Browse the interactive AP
 - **Feb 29 birthdays** are treated as Feb 28 in non-leap years.
 - **PUT requires the full object**. A PATCH endpoint for partial updates is a potential future enhancement.
 
-## Future Enhancements
+## Potential Enhancements
 
 - **PATCH endpoint** for partial contact updates (send only changed fields instead of the full object)
-- **Unit tests** with xUnit for endpoint validation, birthday logic edge cases, and stale contact filtering
+- **Input validation** with `[MaxLength]`, `[EmailAddress]`, `[Phone]` attributes on request DTOs
 - **Pagination** on GET /contacts for large datasets
+- **Server-side birthday query optimization** to avoid loading all contacts into memory
+- **Unit tests** with xUnit for birthday calculation, stale contact cutoff, and other isolated logic
+- **Integration tests** using `WebApplicationFactory` for end-to-end endpoint validation
