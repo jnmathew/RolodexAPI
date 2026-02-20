@@ -60,14 +60,26 @@ public class ContactsController : ControllerBase
     [EndpointSummary("Create a new contact")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Contact>> CreateContact(Contact contact)
+    public async Task<ActionResult<Contact>> CreateContact(CreateContactRequest request)
     {
-        contact.CreatedAtUtc = DateTime.UtcNow;
-        contact.UpdatedAtUtc = DateTime.UtcNow;
+        var contact = new Contact
+        {
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
+            Type = request.Type,
+            Address = request.Address,
+            DateOfBirth = request.DateOfBirth,
+            LastContactedDate = request.LastContactedDate,
+            Notes = request.Notes,
+            CreatedAtUtc = DateTime.UtcNow,
+            UpdatedAtUtc = DateTime.UtcNow
+        };
 
         _context.Contacts.Add(contact);
         await _context.SaveChangesAsync();
-        
+
         return CreatedAtAction(nameof(GetContactById), new { id = contact.Id }, contact);
     }
 
@@ -78,36 +90,28 @@ public class ContactsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateContact(int id, Contact contact)
+    public async Task<IActionResult> UpdateContact(int id, UpdateContactRequest request)
     {
-        if (id != contact.Id)
+        var contact = await _context.Contacts.FindAsync(id);
+        if (contact == null)
         {
-            return BadRequest();
+            return NotFound();
         }
 
+        contact.FirstName = request.FirstName;
+        contact.LastName = request.LastName;
+        contact.Email = request.Email;
+        contact.PhoneNumber = request.PhoneNumber;
+        contact.Type = request.Type;
+        contact.Address = request.Address;
+        contact.DateOfBirth = request.DateOfBirth;
+        contact.LastContactedDate = request.LastContactedDate;
+        contact.Notes = request.Notes;
         contact.UpdatedAtUtc = DateTime.UtcNow;
-        _context.Entry(contact).State = EntityState.Modified;
-        _context.Entry(contact).Property(c => c.CreatedAtUtc).IsModified = false;
 
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await ContactExists(id))
-            {
-                return NotFound();
-            }
-            throw;
-        }
-        
+        await _context.SaveChangesAsync();
+
         return NoContent();
-    }
-
-    private async Task<bool> ContactExists(int id)
-    {
-        return await _context.Contacts.AnyAsync(c => c.Id == id);
     }
 
     [HttpDelete("{id}")]
