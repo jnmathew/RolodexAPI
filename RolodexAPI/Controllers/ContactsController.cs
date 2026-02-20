@@ -17,9 +17,29 @@ public class ContactsController : ControllerBase
 
     [HttpGet]
     [EndpointSummary("Get all contacts")]
+    [EndpointDescription("Supports optional filtering by firstName, lastName, and type.")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<Contact>>> GetAllContacts() {
-        return await _context.Contacts.ToListAsync();
+    public async Task<ActionResult<IEnumerable<Contact>>> GetAllContacts(
+        [FromQuery] string? firstName, [FromQuery] string? lastName, [FromQuery] ContactType? type) 
+    {
+        var query = _context.Contacts.AsQueryable();
+
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            query = query.Where(c => c.FirstName.Contains(firstName));
+        }
+
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            query = query.Where(c => c.LastName.Contains(lastName));
+        }
+
+        if (type.HasValue)
+        {
+            query = query.Where(c => c.Type == type.Value);
+        }
+
+        return await query.ToListAsync();
     }
 
     [HttpGet("{id}")]
