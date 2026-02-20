@@ -34,7 +34,7 @@ The API will be available at `https://localhost:7295`. Browse the interactive AP
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/contacts` | List all contacts |
+| GET | `/contacts` | List all contacts (optional filters: `firstName`, `lastName`, `type`) |
 | GET | `/contacts/{id}` | Get a contact by ID |
 | POST | `/contacts` | Create a new contact |
 | PUT | `/contacts/{id}` | Update a contact |
@@ -70,3 +70,9 @@ The API will be available at `https://localhost:7295`. Browse the interactive AP
 - **Contacts with null `LastContactedDate` are considered stale**, since an untracked interaction implies the relationship needs attention.
 - **Feb 29 birthdays** are treated as Feb 28 in non-leap years.
 - **PUT requires the full object**. A PATCH endpoint for partial updates is a potential future enhancement.
+
+## Future Enhancements
+
+- **PATCH endpoint** for partial contact updates (send only changed fields instead of the full object)
+- **Unit tests** with xUnit for endpoint validation, birthday logic edge cases, and stale contact filtering
+- **Pagination** on GET /contacts for large datasets
