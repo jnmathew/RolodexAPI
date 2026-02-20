@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RolodexAPI.Models;
 
-public class UpdateContactRequest
+public class ContactRequest
 {
     [Required]
     public string FirstName { get; set; } = string.Empty;

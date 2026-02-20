@@ -26,12 +26,12 @@ public class ContactsController : ControllerBase
 
         if (!string.IsNullOrEmpty(firstName))
         {
-            query = query.Where(c => c.FirstName.Contains(firstName));
+            query = query.Where(c => c.FirstName.ToLower().Contains(firstName.ToLower()));
         }
 
         if (!string.IsNullOrEmpty(lastName))
         {
-            query = query.Where(c => c.LastName.Contains(lastName));
+            query = query.Where(c => c.LastName.ToLower().Contains(lastName.ToLower()));
         }
 
         if (type.HasValue)
@@ -60,7 +60,7 @@ public class ContactsController : ControllerBase
     [EndpointSummary("Create a new contact")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Contact>> CreateContact(CreateContactRequest request)
+    public async Task<ActionResult<Contact>> CreateContact(ContactRequest request)
     {
         var contact = new Contact
         {
@@ -88,9 +88,8 @@ public class ContactsController : ControllerBase
     [HttpPut("{id}")]
     [EndpointSummary("Update an existing contact")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateContact(int id, UpdateContactRequest request)
+    public async Task<IActionResult> UpdateContact(int id, ContactRequest request)
     {
         var contact = await _context.Contacts.FindAsync(id);
         if (contact == null)
@@ -136,8 +135,10 @@ public class ContactsController : ControllerBase
     [EndpointSummary("Get upcoming birthdays")]
     [EndpointDescription("Returns contacts with birthdays within the specified number of days. Defaults to 30 days.")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IEnumerable<UpcomingBirthdayDto>>> GetUpcomingBirthdays([FromQuery] int days = 30)
     {
+        if (days < 1) return BadRequest("days must be at least 1.");
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         var contacts = await _context.Contacts
@@ -192,8 +193,10 @@ public class ContactsController : ControllerBase
     [EndpointSummary("Get stale contacts")]
     [EndpointDescription("Returns contacts not reached out to within the specified number of days. Defaults to 90 days.")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IEnumerable<StaleContactDto>>> GetStaleContacts([FromQuery] int days = 90)
     {
+        if (days < 1) return BadRequest("days must be at least 1.");
         var cutoff = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-days));
 
         // Note: Contacts with null LastContactedDate are considered stale
