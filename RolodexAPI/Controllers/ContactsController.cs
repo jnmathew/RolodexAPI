@@ -138,7 +138,7 @@ public class ContactsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<UpcomingBirthdayDto>>> GetUpcomingBirthdays([FromQuery] int days = 30)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         var contacts = await _context.Contacts
             .Where(c => c.DateOfBirth != null)
@@ -194,7 +194,7 @@ public class ContactsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<StaleContactDto>>> GetStaleContacts([FromQuery] int days = 90)
     {
-        var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-days));
+        var cutoff = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-days));
 
         // Note: Contacts with null LastContactedDate are considered stale
         var stale = await _context.Contacts
